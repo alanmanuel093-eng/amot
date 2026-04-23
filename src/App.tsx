@@ -321,7 +321,7 @@ export default function App() {
   const [products, setProducts] = useState<any[]>([]);
   const [isSyncingMeli, setIsSyncingMeli] = useState(false);
   const [testInput, setTestInput] = useState('');
-  const [testResponse, setTestResponse] = useState('');
+  const [simulatorMsgs, setSimulatorMsgs] = useState<{sender: 'user' | 'ai', text: string}[]>([]);
   const [isTesting, setIsTesting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPlatform, setFilterPlatform] = useState<Platform | 'All'>('All');
@@ -1205,80 +1205,123 @@ export default function App() {
                       </div>
                     </Card>
 
-                    <Card className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl dark:border-white/5 border-black/5 dark:border-white/10 rounded-[20px] p-8 flex flex-col h-full relative overflow-hidden ring-1 ring-slate-800 hover:ring-[#007AFF]/50 transition-all shadow-2xl shadow-black-[.02] border border-black/5 dark:border-white/5">
-                       <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#007AFF]/5 rounded-full blur-3xl opacity-50" />
-                       <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-50 mb-2 uppercase tracking-tight">AMOT <span className="text-[#007AFF]">Test Lab</span></h3>
-                       <p className="text-xs text-zinc-500 dark:text-[#EBEBF5]/60 mb-6 font-medium">{t.testLabDesc}</p>
+                    <Card className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-xl dark:border-white/5 border-black/5 dark:border-white/10 rounded-[20px] p-6 lg:p-8 flex flex-col h-full relative overflow-hidden ring-1 ring-slate-800 hover:ring-[#25D366]/50 transition-all shadow-2xl shadow-black-[.02]">
+                       <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#25D366]/5 rounded-full blur-3xl opacity-50" />
                        
-                       <div className="flex-1 space-y-4">
-                          <div className="bg-gray-50 dark:bg-[#1C1C1E] p-5 rounded-[20px] border border-black/5 dark:border-white/5 min-h-[160px] flex flex-col shadow-none backdrop-blur-sm relative">
-                             <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#007AFF]/10 rounded-full animate-ping" />
-                             <p className="text-[10px] font-bold text-zinc-500 dark:text-[#EBEBF5]/60 uppercase mb-4 tracking-[0.2em] flex items-center gap-2">
-                                <Activity size={10} className="text-[#007AFF]" /> {t.previewIA}
-                             </p>
-                             {isTesting ? (
-                                <div className="flex-1 flex flex-col items-center justify-center gap-3 text-[#007AFF] animate-pulse">
-                                   <Loader2 className="animate-spin" size={20} />
-                                   <span className="text-[9px] font-mono tracking-widest uppercase">{t.scanning}</span>
+                       <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-tight flex items-center gap-2">
+                             <div className="w-8 h-8 bg-[#25D366]/10 rounded-full flex items-center justify-center">
+                                <MessageCircle size={16} className="text-[#25D366]" />
+                             </div>
+                             Simulador <span className="text-[#25D366]">Virtual</span>
+                          </h3>
+                       </div>
+                       <p className="text-xs text-zinc-500 dark:text-[#EBEBF5]/60 mb-6 font-medium">Chatea con tu IA ahora mismo, sin conectar ningún número real. Usa tus productos de Mercado Libre en las pruebas.</p>
+                       
+                       <div className="flex-1 flex flex-col pt-2 overflow-hidden relative">
+                          <div className="flex-1 bg-[#efeae2] dark:bg-[#0b141a] rounded-[20px] rounded-b-none border border-black/5 dark:border-white/5 p-4 flex flex-col gap-3 overflow-y-auto min-h-[300px]">
+                             {/* WhatsApp Header Mock */}
+                             <div className="absolute top-2 left-2 right-2 bg-white/90 dark:bg-[#202c33]/90 backdrop-blur-md px-4 py-2 rounded-2xl border border-black/5 flex items-center gap-3 z-10">
+                                <div className="w-8 h-8 bg-zinc-200 dark:bg-zinc-700 rounded-full flex items-center justify-center overflow-hidden">
+                                   <Bot size={16} className="text-zinc-500" />
                                 </div>
-                             ) : testResponse ? (
-                                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="relative">
-                                   <div className="absolute -left-3 top-0 bottom-0 w-0.5 bg-[#007AFF]/10 rounded-full" />
-                                   <p className="text-xs md:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed italic px-2">"{testResponse}"</p>
-                                </motion.div>
-                             ) : (
-                                <div className="flex-1 flex flex-col items-center justify-center text-center py-4">
-                                   <div className="w-10 h-10 bg-zinc-200 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-3">
-                                      <Bot size={18} className="text-zinc-400 dark:text-zinc-500" />
-                                   </div>
-                                   <p className="text-[10px] text-zinc-400 dark:text-zinc-500 max-w-[180px] leading-relaxed uppercase tracking-tighter">{t.enterTest}</p>
+                                <div className="flex-1">
+                                   <p className="text-xs font-bold dark:text-white">Bot AMOT</p>
+                                   <p className="text-[10px] text-[#25D366] font-medium">en línea</p>
                                 </div>
-                             )}
+                             </div>
+
+                             <div className="pt-14 space-y-3">
+                                <div className="text-center">
+                                   <span className="bg-black/5 dark:bg-white/5 px-3 py-1 rounded-full text-[10px] text-zinc-500">Hoy</span>
+                                </div>
+
+                                {simulatorMsgs.map((msg, idx) => (
+                                   <motion.div key={idx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                      <div className={`max-w-[85%] px-4 py-2 text-sm relative ${msg.sender === 'user' ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-zinc-900 dark:text-zinc-50 rounded-[16px] rounded-tr-[4px]' : 'bg-white dark:bg-[#202c33] text-zinc-900 dark:text-zinc-50 rounded-[16px] rounded-tl-[4px] shadow-sm'}`}>
+                                         {msg.text}
+                                         <span className="text-[9px] opacity-40 float-right pt-2 pl-2 mt-1">{new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} {msg.sender === 'user' && '✓✓'}</span>
+                                      </div>
+                                   </motion.div>
+                                ))}
+
+                                {isTesting && (
+                                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+                                      <div className="bg-white dark:bg-[#202c33] px-4 py-3 rounded-[16px] rounded-tl-[4px] shadow-sm flex items-center gap-1">
+                                         <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce" />
+                                         <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}} />
+                                         <div className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}} />
+                                      </div>
+                                   </motion.div>
+                                )}
+                             </div>
                           </div>
                           
-                          <div className="space-y-3">
-                             <Label className="text-[10px] font-bold text-zinc-500 dark:text-[#EBEBF5]/60 uppercase tracking-widest flex justify-between">
-                                {t.testInputLabel} <span>AMOT-X1</span>
-                             </Label>
-                             <div className="flex gap-3">
-                                <Input 
-                                   placeholder="Ej: ¿Hay stock de este producto?" 
-                                   value={testInput}
-                                   onChange={(e) => setTestInput(e.target.value)}
-                                   onKeyDown={(e) => {
-                                      if (e.key === 'Enter' && testInput && !isTesting) {
-                                         // Trigger logic
-                                      }
-                                   }}
-                                   className="bg-gray-50 dark:bg-[#1C1C1E] border-black/5 dark:border-white/10 h-14 rounded-[20px] text-zinc-900 dark:text-zinc-50 focus:ring-1 focus:ring-[#007AFF] transition-all border-opacity-50"
-                                />
-                                <Button 
-                                   onClick={async () => {
-                                      if (!testInput) return;
+                          {/* Chat Input Bar */}
+                          <div className="bg-[#f0f2f5] dark:bg-[#202c33] p-3 rounded-b-[20px] border border-t-0 border-black/5 dark:border-white/5 flex gap-2">
+                             <Input 
+                                placeholder="Escribe un mensaje..." 
+                                value={testInput}
+                                onChange={(e) => setTestInput(e.target.value)}
+                                onKeyDown={async (e) => {
+                                   if (e.key === 'Enter' && testInput && !isTesting) {
+                                      const msg = testInput;
+                                      setTestInput('');
+                                      setSimulatorMsgs(prev => [...prev, { sender: 'user', text: msg }]);
                                       setIsTesting(true);
                                       try {
+                                         // Append product data as invisible context to simulate real memory
+                                         const pContext = products.map(p => `${p.title} ($${p.price}) stock:${p.stock}`).join('|');
+                                         const mockAiContext = `CONTEXTO INVENTARIO M.LIBRE: ${pContext}. `;
                                          const res = await generateAutoResponse({
                                             platform: 'WhatsApp',
-                                            sender: 'Lead Cualificado',
-                                            message: testInput,
+                                            sender: 'Tú',
+                                            message: mockAiContext + msg,
                                             personality: localConfig.personality,
                                             language: localConfig.language
                                          });
-                                         setTestResponse(res);
+                                         setSimulatorMsgs(prev => [...prev, { sender: 'ai', text: res }]);
                                       } finally {
                                          setIsTesting(false);
                                       }
-                                   }}
-                                   disabled={isTesting || !testInput}
-                                   className="bg-[#007AFF] hover:bg-[#0062cc] h-14 w-14 rounded-[20px] shadow-sm group transition-all text-white"
-                                >
-                                   <Send size={20} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                                </Button>
-                             </div>
+                                   }
+                                }}
+                                className="bg-white dark:bg-[#2a3942] border-none flex-1 rounded-full text-zinc-900 dark:text-zinc-50 h-10 px-4 placeholder:text-zinc-500"
+                             />
+                             <Button 
+                                onClick={async () => {
+                                   if (!testInput) return;
+                                   const msg = testInput;
+                                   setTestInput('');
+                                   setSimulatorMsgs(prev => [...prev, { sender: 'user', text: msg }]);
+                                   setIsTesting(true);
+                                   try {
+                                      const pContext = products.map(p => `${p.title} ($${p.price}) stock: ${p.stock}`).join('. ');
+                                      const mockContextMessage = `[Stock Oculto Sistema: ${pContext}] ${msg}`;
+                                      const res = await generateAutoResponse({
+                                         platform: 'WhatsApp',
+                                         sender: 'Tú',
+                                         message: products.length > 0 ? mockContextMessage : msg,
+                                         personality: localConfig.personality,
+                                         language: localConfig.language
+                                      });
+                                      setSimulatorMsgs(prev => [...prev, { sender: 'ai', text: res }]);
+                                   } catch (e) {
+                                      console.error(e);
+                                      setSimulatorMsgs(prev => [...prev, { sender: 'ai', text: 'Error de red en el simulador.' }]);
+                                   } finally {
+                                      setIsTesting(false);
+                                   }
+                                }}
+                                disabled={isTesting || !testInput}
+                                className="bg-[#25D366] hover:bg-[#128C7E] w-10 h-10 rounded-full p-0 shadow-sm text-white flex-shrink-0"
+                             >
+                                <Send size={16} className="-ml-0.5" />
+                             </Button>
                           </div>
                        </div>
                        
-                       <div className="mt-8 pt-6 border-t border-black/5 dark:border-white/10">
+                       <div className="mt-6 pt-5 border-t border-black/5 dark:border-white/10 hidden lg:block">
                           <p className="text-[9px] text-zinc-500 dark:text-[#EBEBF5]/60 uppercase font-bold mb-3 tracking-[0.1em]">{t.presets}:</p>
                           <div className="grid grid-cols-2 gap-2">
                              {[
@@ -1293,9 +1336,9 @@ export default function App() {
                                      setLocalConfig({...localConfig, personality: preset.val});
                                      updateAIConfig({ personality: preset.val });
                                    }}
-                                   className="text-left px-3 py-2 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl text-[9px] text-zinc-500 dark:text-[#EBEBF5]/60 hover:text-[#007AFF]/80 hover:bg-[#007AFF]/5 transition-all border border-black/5 dark:border-white/5"
+                                   className="text-left px-3 py-2 bg-zinc-100 dark:bg-zinc-800/50 rounded-xl text-[9px] text-zinc-500 dark:text-[#EBEBF5]/60 hover:text-[#25D366] hover:bg-[#25D366]/5 transition-all border border-black/5 dark:border-white/5"
                                 >
-                                   <span className="font-black block text-[#007AFF]/70">{preset.name}</span>
+                                   <span className="font-black block text-[#25D366]/70">{preset.name}</span>
                                    <span className="truncate block opacity-50">{preset.val}</span>
                                 </button>
                              ))}
@@ -1421,6 +1464,13 @@ export default function App() {
                          </div>
                          
                          <div className="space-y-6">
+                            <div className="bg-amber-500/10 border border-amber-500/20 rounded-[20px] p-4 flex gap-3 items-start">
+                               <AlertCircle className="text-amber-500 flex-shrink-0 mt-0.5" size={16} />
+                               <div>
+                                  <p className="text-xs font-bold text-amber-600 dark:text-amber-500 mb-1">Políticas de WhatsApp</p>
+                                  <p className="text-[10px] text-amber-600/80 dark:text-amber-500/80 leading-relaxed font-medium">Por regulaciones de Meta, <b>NO PUEDES convertir tu número de celular personal en un Bot</b>, ya que esto podría resultar en un baneo. Para probar automatizaciones, debes obtener un "Número de Prueba Oficial" gratuito en Facebook Developers y luego, enviarle mensajes a ese número de prueba desde tu celular personal.</p>
+                               </div>
+                            </div>
                             <div className="p-4 bg-gray-50 dark:bg-[#1C1C1E] rounded-[20px] border border-black/5 dark:border-white/5">
                                <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase mb-2">Webhook Callback URL</p>
                                <div className="flex items-center justify-between gap-2">
