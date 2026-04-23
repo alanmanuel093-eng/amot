@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isEmailVerified() { return request.auth.token.email_verified == true; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+    // Rules for messages
+    match /messages/{messageId} {
+      function isValidMessage(data) {
+        return data.userId == request.auth.uid &&
+               data.sender is string && data.sender.size() <= 100 &&
+               data.message is string && data.message.size() <= 1000 &&
+               data.platform in ['Instagram', 'WhatsApp', 'Twitter', 'Facebook'] &&
+               data.status in ['pending', 'responded', 'ignored'];
+      }
+
+      allow create: if isSignedIn() && isEmailVerified() && isValidId(messageId) && isValidMessage(request.resource.data);
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isEmailVerified() && resource.data.userId == request.auth.uid && 
+                   isValidMessage(request.resource.data) &&
+                   request.resource.data.userId == resource.data.userId; // Immutable owner
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Rules for configs
+    match /configs/{userId} {
+      function isValidConfig(data) {
+        return data.userId == request.auth.uid &&
+               data.personality is string && data.personality.size() <= 200 &&
+               data.language is string && data.language.size() <= 50 &&
+               data.autoReplyEnabled is bool;
+      }
+
+      allow create: if isSignedIn() && isEmailVerified() && isOwner(userId) && isValidConfig(request.resource.data);
+      allow get: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isEmailVerified() && isOwner(userId); // Simplified update for flexibility
+      allow delete: if isSignedIn() && isOwner(userId);
+    }
+
+    // Rules for products
+    match /products/{productId} {
+      function isValidProduct(data) {
+        return data.userId == request.auth.uid &&
+               data.title is string && data.title.size() <= 200 &&
+               data.price is number &&
+               data.stock is number;
+      }
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create, update: if isSignedIn() && isEmailVerified() && isValidProduct(request.resource.data);
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

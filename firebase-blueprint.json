@@ -1,0 +1,65 @@
+{
+  "entities": {
+    "Message": {
+      "title": "Message",
+      "description": "Incoming social media message and AI response",
+      "type": "object",
+      "properties": {
+        "sender": { "type": "string" },
+        "avatar": { "type": "string" },
+        "message": { "type": "string" },
+        "platform": { "type": "string", "enum": ["Instagram", "WhatsApp", "Twitter", "Facebook"] },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "responded", "ignored"] },
+        "aiResponse": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["sender", "message", "platform", "timestamp", "status", "userId"]
+    },
+    "Config": {
+      "title": "AI Config",
+      "description": "User specific AI personality and rules",
+      "type": "object",
+      "properties": {
+        "personality": { "type": "string" },
+        "language": { "type": "string" },
+        "autoReplyEnabled": { "type": "boolean" },
+        "ignoredKeywords": { "type": "array", "items": { "type": "string" } },
+        "userId": { "type": "string" },
+        "meliAccessToken": { "type": "string" },
+        "meliUserId": { "type": "string" },
+        "meliSyncEnabled": { "type": "boolean" }
+      },
+      "required": ["personality", "language", "autoReplyEnabled", "userId"]
+    },
+    "MeliProduct": {
+      "title": "Mercado Libre Product",
+      "description": "Inventory product synced from Mercado Libre",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "price": { "type": "number" },
+        "stock": { "type": "number" },
+        "permalink": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "title", "price", "stock", "userId"]
+    }
+  },
+  "firestore": {
+    "messages": {
+      "schema": "Message",
+      "description": "Global collection of social messages"
+    },
+    "configs": {
+      "schema": "Config",
+      "description": "User configuration documents"
+    },
+    "products": {
+      "schema": "MeliProduct",
+      "description": "Products synced from Mercado Libre for AI context"
+    }
+  }
+}
